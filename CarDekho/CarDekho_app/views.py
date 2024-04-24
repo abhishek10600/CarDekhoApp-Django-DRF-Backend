@@ -8,7 +8,7 @@ from rest_framework.views import APIView
 from rest_framework import mixins
 from rest_framework import generics
 from rest_framework.authentication import BasicAuthentication, SessionAuthentication
-from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
+from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser, DjangoModelPermissions
 
 # from django.http import JsonResponse
 # from django.http import HttpResponse
@@ -43,31 +43,56 @@ from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
 
 # ***** GENERICS VIEWS AND MIXINS *****
 # Generic views are used when we want basic post, get and other methods with no customization and control.
-class ReviewList(mixins.ListModelMixin, mixins.CreateModelMixin, generics.GenericAPIView):
-    queryset = Review.objects.all()
-    serializer_class = ReviewSerializer
+# class ReviewList(mixins.ListModelMixin, mixins.CreateModelMixin, generics.GenericAPIView):
+#     queryset = Review.objects.all()
+#     serializer_class = ReviewSerializer
 
-    def get(self, request, *args, **kwargs):
-        return self.list(request, *args, **kwargs)
+#     authentication_classes = [SessionAuthentication]
+#     # DjangoModelPermission is used to provide permissions to specific user. It can only be used in views that have a queryset or get_queyset
+#     permission_classes = [DjangoModelPermissions]
 
-    def post(self, request, *args, **kwargs):
-        return self.create(request, *args, **kwargs)
+#     def get(self, request, *args, **kwargs):
+#         return self.list(request, *args, **kwargs)
+
+#     def post(self, request, *args, **kwargs):
+#         return self.create(request, *args, **kwargs)
 
 
-class ReviewDetail(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin, generics.GenericAPIView):
-    queryset = Review.objects.all()
-    serializer_class = ReviewSerializer
+# class ReviewDetail(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin, generics.GenericAPIView):
+#     queryset = Review.objects.all()
+#     serializer_class = ReviewSerializer
 
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
+#     def get(self, request, *args, **kwargs):
+#         return self.retrieve(request, *args, **kwargs)
 
-    def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
+#     def put(self, request, *args, **kwargs):
+#         return self.update(request, *args, **kwargs)
 
-    def delete(self, request, *args, **kwargs):
-        return self.destroy(request, *args, **kwargs)
+#     def delete(self, request, *args, **kwargs):
+#         return self.destroy(request, *args, **kwargs)
 
 # *********************************************************************
+
+
+# ***** CONCRETE CLASSES *****
+# CONCRETE CLASSES are built using the mixins and the generic views
+
+
+class ReviewList(generics.ListCreateAPIView):
+
+    authentication_classes = [SessionAuthentication]
+    # DjangoModelPermission is used to provide permissions to specific user. It can only be used in views that have a queryset or get_queyset
+    permission_classes = [DjangoModelPermissions]
+
+    queryset = Review.objects.all()
+    serializer_class = ReviewSerializer
+
+
+class ReviewDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Review.objects.all()
+    serializer_class = ReviewSerializer
+
+# ***********************************************************************
 
 
 # ***** Class Based Views *****
@@ -80,6 +105,7 @@ class ShowRoom_View(APIView):
     # permission_classes = [IsAdminUser]
 
     # session authentication
+    # we use the authentication_classes and permission_classes in all the views where we want authentication and permission
     authentication_classes = [SessionAuthentication]
     permission_classes = [IsAuthenticated]
 
