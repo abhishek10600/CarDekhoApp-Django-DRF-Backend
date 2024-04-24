@@ -7,6 +7,8 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework import mixins
 from rest_framework import generics
+from rest_framework.authentication import BasicAuthentication, SessionAuthentication
+from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
 
 # from django.http import JsonResponse
 # from django.http import HttpResponse
@@ -70,6 +72,17 @@ class ReviewDetail(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.De
 
 # ***** Class Based Views *****
 class ShowRoom_View(APIView):
+
+    # applying authentication
+    # authentication_classes = [BasicAuthentication]
+    # permission_classes = [IsAuthenticated]
+    # permission_classes = [AllowAny]
+    # permission_classes = [IsAdminUser]
+
+    # session authentication
+    authentication_classes = [SessionAuthentication]
+    permission_classes = [IsAuthenticated]
+
     def get(self, request):
         showroom = ShowroomList.objects.all()
         serializer = ShowroomSerializer(
@@ -93,7 +106,8 @@ class ShowRoom_Detail(APIView):
             return Response({
                 "error": "Showroom not found"
             }, status=status.HTTP_404_NOT_FOUND)
-        serializer = ShowroomSerializer(showroom)
+        # we pass the context because in serializer we are using the nested serializer and we are using HyperlinkedRelatedField. If we are not using the HyperlinkedRelatedField should remove the context from the argument.
+        serializer = ShowroomSerializer(showroom, context={"request": request})
         return Response(serializer.data)
 
     def put(self, request, pk):
