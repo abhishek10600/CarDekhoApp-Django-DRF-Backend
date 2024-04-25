@@ -9,6 +9,9 @@ from rest_framework import mixins
 from rest_framework import generics
 from rest_framework.authentication import BasicAuthentication, SessionAuthentication
 from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser, DjangoModelPermissions
+from rest_framework import viewsets
+from django.shortcuts import get_object_or_404
+from rest_framework.exceptions import ValidationError
 
 # from django.http import JsonResponse
 # from django.http import HttpResponse
@@ -77,15 +80,46 @@ from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser, D
 # ***** CONCRETE CLASSES *****
 # CONCRETE CLASSES are built using the mixins and the generic views
 
-
-class ReviewList(generics.ListCreateAPIView):
+# use concreate classes when working on an api that uses foreign relationships.
+class ReviewCreate(generics.CreateAPIView):
 
     authentication_classes = [SessionAuthentication]
-    # DjangoModelPermission is used to provide permissions to specific user. It can only be used in views that have a queryset or get_queyset
-    permission_classes = [DjangoModelPermissions]
+    permission_classes = [IsAuthenticated]
 
-    queryset = Review.objects.all()
     serializer_class = ReviewSerializer
+
+    def get_queryset(self):
+        return Review.objects.all()
+
+    def perform_create(self, serializer):
+        pk = self.kwargs["pk"]
+        cars = CarList.objects.get(pk=pk)
+
+        # we can get the information of the logged in user using self.request.user
+        useredit = self.request.user
+        # we want one user to review only once
+        Review_queryset = Review.objects.filter(car=cars, apiuser=useredit)
+        if Review_queryset.exists():
+            raise ValidationError("Your review already exists.")
+        serializer.save(car=cars, apiuser=useredit)
+
+
+class ReviewList(generics.ListAPIView):
+
+    # authentication_classes = [SessionAuthentication]
+    # DjangoModelPermission is used to provide permissions to specific user. It can only be used in views that have a queryset or get_queyset
+    # permission_classes = [DjangoModelPermissions]
+
+    # queryset = Review.objects.all()
+    # serializer_class = ReviewSerializer
+
+    serializer_class = ReviewSerializer
+
+    # get the review of a car py the primary key of the car
+
+    def get_queryset(self):
+        pk = self.kwargs["pk"]
+        return Review.objects.filter(car=pk)
 
 
 class ReviewDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -160,8 +194,11 @@ class ShowRoom_Detail(APIView):
         showroom.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+# *******************************************************************************
 
 # ***** Function Based Views *****
+
+
 @api_view(["GET", "POST"])
 def car_list_view(request):
     if request.method == "GET":
@@ -208,3 +245,53 @@ def car_detail_view(request, pk):  # the pk is taken from the url so its a param
         car = CarList.objects.get(pk=pk)
         car.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+# *************************************************************************************
+
+# ***** VIEWSET *****
+# view set is another way to develop CRUD APIs
+
+
+class Showroom_Viewset(viewsets.ViewSet):
+
+    def create(self, request):
+        serializer = ShowroomSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def list(self, request):
+        queryset = ShowroomList.objects.all()
+        serializer = ShowroomSerializer(queryset, many=True,)
+        return Response(serializer.data)
+
+    def retrieve(self, request, pk=None):
+        queryset = ShowroomList.objects.all()
+        user = get_object_or_404(queryset, pk=pk)
+        serializer = ShowroomSerializer(user)
+        return Response(serializer.data)
+
+    # def update(self, request, pk=None):
+    #     pass
+
+    # def partial_update(self, request, pk=None):
+    #     pass
+
+    # def destroy(self, request, pk=None):
+    #     pass
+
+# ***********************************************************************************
+
+# **** MODELVIEWSET ****
+# Model Viewset using mixins and it allows all the CRUD operations in the api.
+
+
+class Showroom_ModelViewSet(viewsets.ModelViewSet):
+
+    # authentication_classes = [SessionAuthentication]
+    # permission_classes = [IsAuthenticated]
+
+    queryset = ShowroomList.objects.all()
+    serializer_class = ShowroomSerializer

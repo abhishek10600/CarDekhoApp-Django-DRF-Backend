@@ -1,6 +1,7 @@
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.contrib.auth.models import User
 
 
 def alphanumeric(value):  # validators
@@ -36,6 +37,8 @@ class CarList(models.Model):
 
 
 class Review(models.Model):
+    # adding the apiuser field so that we can see which user created the review
+    apiuser = models.ForeignKey(User, on_delete=models.CASCADE)
     rating = models.IntegerField(
         validators=[MaxValueValidator, MinValueValidator])
     comments = models.CharField(max_length=200, null=True)

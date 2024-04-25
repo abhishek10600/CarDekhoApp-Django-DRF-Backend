@@ -58,9 +58,13 @@ from ..models import CarList, ShowroomList, Review
 
 
 class ReviewSerializer(serializers.ModelSerializer):
+    # apiuser is the name of the field on the Review model that we created
+    apiuser = serializers.StringRelatedField(read_only=True)
+
     class Meta:
         model = Review
-        fields = "__all__"
+        exclude = ["car"]
+        # fields = "__all__"
 
 
 class CarSerializer(serializers.ModelSerializer):
@@ -104,11 +108,11 @@ class ShowroomSerializer(serializers.ModelSerializer):
     # Showrooms = serializers.StringRelatedField(many=True)
 
     # it will only give the primary key of the related item
-    # Showrooms = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+    Showrooms = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
 
     # it will give the link to info of the related item
-    Showrooms = serializers.HyperlinkedRelatedField(
-        many=True, read_only=True, view_name='car_detail')
+    # Showrooms = serializers.HyperlinkedRelatedField(
+    #     many=True, read_only=True, view_name='car_detail')
 
     class Meta:
         model = ShowroomList
