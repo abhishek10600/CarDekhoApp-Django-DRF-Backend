@@ -58,7 +58,7 @@ from ..models import CarList, ShowroomList, Review
 
 
 class ReviewSerializer(serializers.ModelSerializer):
-    # apiuser is the name of the field on the Review model that we created
+    # apiuser is the name of the field on the Review model that we created  
     apiuser = serializers.StringRelatedField(read_only=True)
 
     class Meta:

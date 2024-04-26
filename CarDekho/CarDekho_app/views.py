@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from .models import CarList, ShowroomList, Review
 from .api_file.serializers import CarSerializer, ShowroomSerializer, ReviewSerializer
+from .api_file.permissions import AdminOrReadOnlyPermission, ReviewUserOrReadOnlyPermission
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework import status
@@ -125,6 +126,10 @@ class ReviewList(generics.ListAPIView):
 class ReviewDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
+
+    # applying the custom permissions that we created in permissions.py file
+    # permission_classes = [AdminOrReadOnlyPermission]
+    permission_classes = [ReviewUserOrReadOnlyPermission]
 
 # ***********************************************************************
 
