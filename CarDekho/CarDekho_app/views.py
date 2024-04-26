@@ -8,7 +8,7 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework import mixins
 from rest_framework import generics
-from rest_framework.authentication import BasicAuthentication, SessionAuthentication
+from rest_framework.authentication import BasicAuthentication, SessionAuthentication, TokenAuthentication
 from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser, DjangoModelPermissions
 from rest_framework import viewsets
 from django.shortcuts import get_object_or_404
@@ -116,6 +116,13 @@ class ReviewList(generics.ListAPIView):
 
     serializer_class = ReviewSerializer
 
+    # we need to pass the token in the authorization header.
+    authentication_classes = [TokenAuthentication]
+
+    # applying the custom permissions that we created in permissions.py file
+    # permission_classes = [AdminOrReadOnlyPermission]
+    permission_classes = [AdminOrReadOnlyPermission]
+
     # get the review of a car py the primary key of the car
 
     def get_queryset(self):
@@ -126,6 +133,9 @@ class ReviewList(generics.ListAPIView):
 class ReviewDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
+
+    # we need to pass the token in the authorization header.
+    authentication_classes = [TokenAuthentication]
 
     # applying the custom permissions that we created in permissions.py file
     # permission_classes = [AdminOrReadOnlyPermission]

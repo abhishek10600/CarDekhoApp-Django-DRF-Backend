@@ -2,3 +2,5 @@ env
 CarDekho/CarDekho/__pycache__
 CarDekho/CarDekho_app/__pycache__
 CarDekho/CarDekho_app/api_file/__pycache__
+CarDekho/user_app/__pycache__ 
+CarDekho/user_app/api/__pycache__

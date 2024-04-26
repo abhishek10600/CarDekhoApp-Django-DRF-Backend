@@ -21,6 +21,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path("car/", include("CarDekho_app.urls")),
 
+    # including the urls of the user_app
+    path("account/", include("user_app.api.urls")),
     # this route is for authentication
-    path("auth/", include("rest_framework.urls", namespace="rest_framework")),
+    # path("auth/", include("rest_framework.urls", namespace="rest_framework")),
 ]
