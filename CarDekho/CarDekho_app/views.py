@@ -14,6 +14,9 @@ from rest_framework import viewsets
 from django.shortcuts import get_object_or_404
 from rest_framework.exceptions import ValidationError
 
+# importing the JWTAuthentication and we can use it where we want jwt auth.
+from rest_framework_simplejwt.authentication import JWTAuthentication
+
 # from django.http import JsonResponse
 # from django.http import HttpResponse
 # import json
@@ -117,11 +120,11 @@ class ReviewList(generics.ListAPIView):
     serializer_class = ReviewSerializer
 
     # we need to pass the token in the authorization header.
-    authentication_classes = [TokenAuthentication]
+    authentication_classes = [JWTAuthentication]  # applying jwt authentication
 
     # applying the custom permissions that we created in permissions.py file
     # permission_classes = [AdminOrReadOnlyPermission]
-    permission_classes = [AdminOrReadOnlyPermission]
+    permission_classes = [IsAuthenticated,]
 
     # get the review of a car py the primary key of the car
 
